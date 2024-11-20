@@ -82,25 +82,21 @@ CREATE TYPE model_type AS (
     coeffs      varchar[],
     resultant   varchar,
     bad_primes  integer[],
-    height      double precision,
-    base_field_label  varchar(%s),
-    conjugation_from_original varchar[],
-    conjugation_from_original_base_field_label varchar(%s)
+    height      real,
+    base_field_label  varchar(%s)
   )""",
-  [field_label_length,field_label_length])
+  [field_label_length])
 
 my_cursor.execute("""
 CREATE TYPE newton_model_type AS (
     coeffs      varchar[],
     resultant   varchar,
     bad_primes  integer[],
-    height      double precision,
+    height      real,
     base_field_label  varchar(%s),
-    polynomial_coeffs  varchar[],
-    conjugation_from_original varchar[],
-    conjugation_from_original_base_field_label varchar(%s)
+    polynomial_coeffs  varchar[]
   )""",
-  [field_label_length,field_label_length])
+  [field_label_length])
 
 
 ######################################

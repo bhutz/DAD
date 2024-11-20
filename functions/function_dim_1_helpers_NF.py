@@ -397,8 +397,8 @@ def add_function_NF(F, my_cursor, bool_add_field=False, log_file=sys.stdout, tim
     #models['original'].update({'base_field_emb': int(emb_index)})
     M = MatrixSpace(F.base_ring(), F.domain().dimension_relative()+1, F.domain().dimension_relative()+1).one()
     #conjugation to original model
-    f['original_model.conjugation_from_original'] = [str(t) for r in M for t in r]
-    f['original_model.conjugation_from_original_base_field_label'] = f['base_field_label']
+    #f['original_model.conjugation_from_original'] = [str(t) for r in M for t in r]
+    #f['original_model.conjugation_from_original_base_field_label'] = f['base_field_label']
 
     f['display_model'] = 'original'
     log_file.write('original computed: \n')
@@ -408,15 +408,13 @@ def add_function_NF(F, my_cursor, bool_add_field=False, log_file=sys.stdout, tim
          sigma_one, sigma_two, ordinal,
          original_model.coeffs, original_model.resultant, original_model.bad_primes,
          original_model.height, original_model.base_field_label,
-         original_model.conjugation_from_original,
-         original_model.conjugation_from_original_base_field_label, display_model)
+         display_model)
         VALUES
         (%(degree)s, %(base_field_label)s, %(base_field_degree)s,
          %(sigma_one)s,%(sigma_two)s,%(ordinal)s,
          %(original_model.coeffs)s, %(original_model.resultant)s, %(original_model.bad_primes)s,
          %(original_model.height)s, %(original_model.base_field_label)s,
-         %(original_model.conjugation_from_original)s,
-         %(original_model.conjugation_from_original_base_field_label)s, %(display_model)s)
+         %(display_model)s)
         RETURNING function_id """,f)
     F_id = my_cursor.fetchone()[0]
     f['function_id'] = F_id
@@ -802,19 +800,17 @@ def add_reduced_model_NF(function_id, my_cursor, model_name='original', log_file
         #query['reduced_model.base_field.degree'] = int(F.base_ring().degree())
         #models['original'].update({'base_field_emb': int(emb_index)})
         #conjugation to original model
-        query['reduced_model.conjugation_from_original'] = [str(t) for r in M for t in r]
+        #query['reduced_model.conjugation_from_original'] = [str(t) for r in M for t in r]
         #can these fields be different?
-        assert(M.base_ring()==F.base_ring())
-        query['reduced_model.conjugation_from_original_base_field_label'] = K_id
+        #assert(M.base_ring()==F.base_ring())
+        #query['reduced_model.conjugation_from_original_base_field_label'] = K_id
 
         my_cursor.execute("""UPDATE functions_dim_1_NF
             SET reduced_model.coeffs = %(reduced_model.coeffs)s,
                 reduced_model.resultant = %(reduced_model.resultant)s,
                 reduced_model.bad_primes = %(reduced_model.bad_primes)s,
                 reduced_model.height = %(reduced_model.height)s,
-                reduced_model.base_field_label = %(reduced_model.base_field_label)s,
-                reduced_model.conjugation_from_original = %(reduced_model.conjugation_from_original)s,
-                reduced_model.conjugation_from_original_base_field_label = %(reduced_model.conjugation_from_original_base_field_label)s
+                reduced_model.base_field_label = %(reduced_model.base_field_label)s
             WHERE
                 function_id = %(function_id)s
             """, query)
@@ -930,17 +926,15 @@ def add_monic_centered_model_NF(function_id, my_cursor, model_name='original', l
         #query['monic_centered.base_field.degree'] = int(L.degree())
         #models['original'].update({'base_field_emb': int(emb_index)})
         #conjugation to original model
-        query['monic_centered.conjugation_from_original'] = [str(t) for r in M for t in r]
+        #query['monic_centered.conjugation_from_original'] = [str(t) for r in M for t in r]
         #can these fields be different?
-        query['monic_centered.conjugation_from_original_base_field_label'] = L_id
+        #query['monic_centered.conjugation_from_original_base_field_label'] = L_id
 
         my_cursor.execute("""UPDATE functions_dim_1_NF
             SET monic_centered.coeffs = %(monic_centered.coeffs)s,
                 monic_centered.resultant = %(monic_centered.resultant)s,
                 monic_centered.bad_primes = %(monic_centered.bad_primes)s,
-                monic_centered.base_field_label = %(monic_centered.base_field_label)s,
-                monic_centered.conjugation_from_original = %(monic_centered.conjugation_from_original)s,
-                monic_centered.conjugation_from_original_base_field_label = %(monic_centered.conjugation_from_original_base_field_label)s
+                monic_centered.base_field_label = %(monic_centered.base_field_label)s
             WHERE
                 function_id = %(function_id)s
             """, query)
@@ -1089,8 +1083,8 @@ def add_chebyshev_model_NF(function_id, my_cursor, model_name='original', log_fi
         M = matrix(L, N+1, N+1, [phi(t) for t in el])
         bool, L_id = lmfdb_field_label_NF(L)
         assert(bool)
-        query['chebyshev_model.conjugation_from_original'] = [str(t) for r in M for t in r]
-        query['chebyshev_model.conjugation_from_original_base_field_label'] = L_id
+        #query['chebyshev_model.conjugation_from_original'] = [str(t) for r in M for t in r]
+        #query['chebyshev_model.conjugation_from_original_base_field_label'] = L_id
 
         #return query
 
@@ -1100,8 +1094,6 @@ def add_chebyshev_model_NF(function_id, my_cursor, model_name='original', log_fi
                 chebyshev_model.bad_primes = %(chebyshev_model.bad_primes)s,
                 chebyshev_model.height = %(chebyshev_model.height)s,
                 chebyshev_model.base_field_label = %(chebyshev_model.base_field_label)s,
-                chebyshev_model.conjugation_from_original = %(chebyshev_model.conjugation_from_original)s,
-                chebyshev_model.conjugation_from_original_base_field_label = %(chebyshev_model.conjugation_from_original_base_field_label)s,
                 is_chebyshev = %(is_chebyshev)s
             WHERE
                 function_id = %(function_id)s
@@ -1215,8 +1207,8 @@ def add_newton_model_NF(function_id, my_cursor, model_name='original', log_file=
         #query['newton_model.base_field.degree'] = int(L.degree())
         #models['original'].update({'base_field_emb': int(emb_index)})
         #conjugation to original model
-        query['newton_model.conjugation_from_original'] = [str(t) for r in M for t in r]
-        query['newton_model.conjugation_from_original_base_field_label'] = L_id
+        #query['newton_model.conjugation_from_original'] = [str(t) for r in M for t in r]
+        #query['newton_model.conjugation_from_original_base_field_label'] = L_id
         C = []
         z = Npoly.parent().gen(0)
         for i in range(0,Npoly.degree()+1):
@@ -1229,8 +1221,6 @@ def add_newton_model_NF(function_id, my_cursor, model_name='original', log_file=
                 newton_model.bad_primes = %(newton_model.bad_primes)s,
                 newton_model.height = %(newton_model.height)s,
                 newton_model.base_field_label = %(newton_model.base_field_label)s,
-                newton_model.conjugation_from_original = %(newton_model.conjugation_from_original)s,
-                newton_model.conjugation_from_original_base_field_label = %(newton_model.conjugation_from_original_base_field_label)s,
                 newton_model.polynomial_coeffs = %(newton_model.polynomial_coeffs)s,
                 is_newton = %(is_newton)s
             WHERE
