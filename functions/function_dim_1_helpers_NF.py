@@ -120,21 +120,19 @@ def model_in_database_NF(F, my_cursor, sigma_1=None, conj_fns=None, log_file=sys
             function_id,
             (original_model).coeffs,(original_model).base_field_label,
             (monic_centered).coeffs,(monic_centered).base_field_label,
-            (chebyshev_model).coeffs,(chebyshev_model).base_field_label,
-            (reduced_model).coeffs,(reduced_model).base_field_label,
-            (newton_model).coeffs,(newton_model).base_field_label
+            (reduced_model).coeffs,(reduced_model).base_field_label
              FROM functions_dim_1_NF
             WHERE degree=%(degree)s AND sigma_one=%(sigma_one)s""",query)
         conj_fns = my_cursor.fetchall()
 
-    model_names = ['original_model', 'monic_centered', 'chebyshev_model', 'reduced_model', 'newton_model']
+    model_names = ['original_model', 'monic_centered', 'reduced_model']
     #field_label, emb_index, field_id = get_field_label(F.base_ring(), log_file=log_file)
     F_coeffs = [get_coefficients(g) for g in F]
     bool, K_id = lmfdb_field_label_NF(F.base_ring(), log_file=log_file)
     if not bool:
         return 0, '0'
     for g in conj_fns:
-        for i in range(5):
+        for i in range(len(model_names)):
             if g[2*i+1] == F_coeffs and g[2*i+2] == str(K_id):
                 return 1, g[0]
     return 0, '0'
@@ -155,16 +153,8 @@ def get_sage_func_NF(function_id, model_name, my_cursor, log_file=sys.stdout):
         my_cursor.execute("""SELECT (monic_centered).coeffs, (monic_centered).base_field_label FROM functions_dim_1_NF
             WHERE function_id=%(function_id)s
             """, query)
-    elif model_name == 'chebyshev':
-        my_cursor.execute("""SELECT (chebyshev_model).coeffs, (chebyshev_model).base_field_label FROM functions_dim_1_NF
-            WHERE function_id=%(function_id)s
-            """, query)
     elif model_name == 'reduced':
         my_cursor.execute("""SELECT (reduced_model).coeffs, (reduced_model).base_field_label FROM functions_dim_1_NF
-            WHERE function_id=%(function_id)s
-            """, query)
-    elif model_name == 'newton':
-        my_cursor.execute("""SELECT (newton_model).coeffs, (newton_model).base_field_label FROM functions_dim_1_NF
             WHERE function_id=%(function_id)s
             """, query)
     G = my_cursor.fetchone()
@@ -293,7 +283,7 @@ def conj_in_database_NF(F, my_cursor, conj_fns=None, log_file=sys.stdout, timeou
 
     except AlarmInterrupt:
         log_file.write('timeout: func_in_db: ' + str(timeout) + ':' + str(list(F)) + '\n')
-        raise
+        #raise
 
 
 def add_function_NF(F, my_cursor, bool_add_field=False, log_file=sys.stdout, timeout=30):
@@ -491,7 +481,7 @@ def add_is_pcf(my_cursor, function_id=None, model_name='original', bool_add_fiel
         log_file.write('timeout: is_pcf for:' + str(timeout) + ':' + str(function_id) + '\n')
     except Exception as e:
         log_file.write('failure: is_pcf for:' + str(function_id) + 'with error:' + str(e) + '\n')
-        raise
+        #raise
 
     cancel_alarm()
     return False
@@ -579,7 +569,7 @@ def add_automorphism_group_NF(function_id, my_cursor, model_name='original', log
         log_file.write('timeout: aut group for:' + str(timeout) + ':' + str(function_id) + '\n')
     except Exception as e:
         log_file.write('failure: aut group for:' + str(function_id) + 'with error:' + str(e) + '\n')
-        raise
+        #raise
     cancel_alarm()
     return False
 
@@ -752,7 +742,7 @@ def add_rational_preperiodic_points_NF(function_id, my_cursor, model_name='origi
         log_file.write('timeout: preperiodic points for:' + str(timeout) + ':' + str(function_id) + '\n')
     except Exception as e:
         log_file.write('failure: preperiodic points for:' + str(function_id) + 'with error:' + str(e) + '\n')
-        raise
+        #raise
 
     cancel_alarm()
     return False
@@ -833,7 +823,7 @@ def add_reduced_model_NF(function_id, my_cursor, model_name='original', log_file
         log_file.write('reduced model timeout: ' + str(timeout) + ':' + str(function_id) + '\n')
     except Exception as e:
         log_file.write('reduced model failure: ' + str(function_id) + 'with error:' + str(e) + '\n')
-        raise
+        #raise
     cancel_alarm()
     return False
 
@@ -867,7 +857,7 @@ def add_is_polynomial_NF(function_id, my_cursor, model_name='original', log_file
         log_file.write('is_polynomial timeout: ' + str(timeout) + ':' + str(function_id) + '\n')
     except Exception as e:
         log_file.write('is_polynomial failure: ' + str(function_id) + 'with error:' + str(e) + '\n')
-        raise
+        #raise
     cancel_alarm()
     return False
 
@@ -958,27 +948,19 @@ def add_monic_centered_model_NF(function_id, my_cursor, model_name='original', l
         log_file.write('monic centered model timeout: ' + str(timeout) + ':' + str(function_id) + '\n')
     except Exception as e:
         log_file.write('monic centered model failure: ' + str(function_id) + 'with error:' + str(e) + '\n')
-        raise
+        #raise
     cancel_alarm()
     return False
 
 def add_chebyshev_model_NF(function_id, my_cursor, model_name='original', log_file=sys.stdout, timeout=30):
     """
-    Determine if chebyshev and compute the chebyshev model.
+    Determine if chebyshev.
 
     if 'is_polynomial' is not set, add_is_polynomial is called.
 
     if 'is_pcf' is not set, add_is_pcf is called.
 
     is_Chebshyev is set
-
-    coeffs      varchar[],
-    resultant   varchar,
-    bad_primes  integer[],
-    height      double precision,
-    base_field_label varchar,
-    conjugation_from_original varchar[],
-    conjugation_from_original_base_field_label varchar(%s)
 
     """
     query={}
@@ -1012,7 +994,7 @@ def add_chebyshev_model_NF(function_id, my_cursor, model_name='original', log_fi
     if not is_pcf:
         cancel_alarm()
         #not chebyshev if not pcf
-        query['is_chebyshev']=False
+        query['is_chebyshev'] = False
         my_cursor.execute("""UPDATE functions_dim_1_NF
             SET is_chebyshev = %(is_chebyshev)s
             WHERE
@@ -1063,48 +1045,11 @@ def add_chebyshev_model_NF(function_id, my_cursor, model_name='original', log_fi
             """, query)
             #TODO check rowcount
             return True
-        #else compute a chebyshev model
-        log_file.write('computing chebyshev model for:' + str(function_id) + '\n')
-        cheby_model = {}
-        ch = F.domain().chebyshev_polynomial(d)
-        conj_set = Fbar.conjugating_set(ch.change_ring(QQbar))
-        K = ch.base_ring()
-        bool, K_id = lmfdb_field_label_NF(K)
-        assert(bool)
+        #else is chebyshev
 
         query['is_chebyshev'] = True
-        query['chebyshev_model.coeffs'] = [get_coefficients(g) for g in ch]
-        query['chebyshev_model.resultant'] = str(ch.resultant())
-        if K.degree() == 1:
-            bad_primes = ch.primes_of_bad_reduction()
-        else:
-            bad_primes = list(set([p.norm() for p in ch.primes_of_bad_reduction()])) #remove duplicates
-            bad_primes.sort()
-        query['chebyshev_model.bad_primes'] = [int(p) for p in bad_primes]
-        query['chebyshev_model.height'] = float(ch.global_height())
-        query['chebyshev_model.base_field_label'] = K_id
-        #query['chebyshev_model.base_field.degree'] = int(K.degree())
-        #models['original'].update({'base_field_emb': int(emb_index)})
-        #conjugation to original model
-        N = ch.domain().dimension()
-        M = conj_set[0]
-        K, el, psi = number_field_elements_from_algebraics([t for r in M for t in r])
-        L, phi = normalize_field_NF(K, log_file=log_file)
-        M = matrix(L, N+1, N+1, [phi(t) for t in el])
-        bool, L_id = lmfdb_field_label_NF(L)
-        assert(bool)
-        #query['chebyshev_model.conjugation_from_original'] = [str(t) for r in M for t in r]
-        #query['chebyshev_model.conjugation_from_original_base_field_label'] = L_id
-
-        #return query
-
         my_cursor.execute("""UPDATE functions_dim_1_NF
-            SET chebyshev_model.coeffs = %(chebyshev_model.coeffs)s,
-                chebyshev_model.resultant = %(chebyshev_model.resultant)s,
-                chebyshev_model.bad_primes = %(chebyshev_model.bad_primes)s,
-                chebyshev_model.height = %(chebyshev_model.height)s,
-                chebyshev_model.base_field_label = %(chebyshev_model.base_field_label)s,
-                is_chebyshev = %(is_chebyshev)s
+            SET is_chebyshev = %(is_chebyshev)s
             WHERE
                 function_id = %(function_id)s
             """, query)
@@ -1119,24 +1064,17 @@ def add_chebyshev_model_NF(function_id, my_cursor, model_name='original', log_fi
         log_file.write('chebyshev model timeout: ' + str(timeout) + ':' + str(function_id) + '\n')
     except Exception as e:
         log_file.write('chebyshev model failure: ' + str(function_id) + 'with error:' + str(e) + '\n')
-        raise
+        #raise
     cancel_alarm()
     return False
 
 def add_newton_model_NF(function_id, my_cursor, model_name='original', log_file=sys.stdout, timeout=30):
     """
-    Determine if newton and compute the newton model.
+    Determine if newton and compute the associated newton polynomial
     See 1510.02271 for a possible newton citation
 
     'is_newton'
-    coeffs      varchar[],
-    resultant   varchar,
-    bad_primes  integer[],
-    height      double precision,
-    base_field_label  varchar,
-    polynomial_coeffs  varchar[],
-    conjugation_from_original varchar[],
-    conjugation_from_original_base_field_label varchar(%s)
+    newton_polynomial_coeffs  varchar[],
     """
     query={}
     query['function_id']=function_id
@@ -1204,34 +1142,14 @@ def add_newton_model_NF(function_id, my_cursor, model_name='original', log_file=
         assert(Npoly.derivative(z) == (z-N_aff[0]).denominator()), "not actually newton"
         query['is_newton'] = True
 
-        query['newton_model.coeffs'] = [get_coefficients(g) for g in newton]
-        query['newton_model.resultant'] = str(newton.resultant())
-        if L.degree() == 1:
-            bad_primes = newton.primes_of_bad_reduction()
-        else:
-            bad_primes = list(set([p.norm() for p in newton.primes_of_bad_reduction()])) #remove duplicates
-            bad_primes.sort()
-        query['newton_model.bad_primes'] = [int(p) for p in bad_primes]
-        query['newton_model.height'] = float(newton.global_height())
-        query['newton_model.base_field_label'] = L_id
-        #query['newton_model.base_field.degree'] = int(L.degree())
-        #models['original'].update({'base_field_emb': int(emb_index)})
-        #conjugation to original model
-        #query['newton_model.conjugation_from_original'] = [str(t) for r in M for t in r]
-        #query['newton_model.conjugation_from_original_base_field_label'] = L_id
         C = []
         z = Npoly.parent().gen(0)
         for i in range(0,Npoly.degree()+1):
             C.append(str(Npoly.coefficient({z:i})))
-        query['newton_model.polynomial_coeffs'] = C
+        query['newton_polynomial_coeffs'] = C
 
         my_cursor.execute("""UPDATE functions_dim_1_NF
-            SET newton_model.coeffs = %(newton_model.coeffs)s,
-                newton_model.resultant = %(newton_model.resultant)s,
-                newton_model.bad_primes = %(newton_model.bad_primes)s,
-                newton_model.height = %(newton_model.height)s,
-                newton_model.base_field_label = %(newton_model.base_field_label)s,
-                newton_model.polynomial_coeffs = %(newton_model.polynomial_coeffs)s,
+            SET newton_polynomial_coeffs = %(newton_model.polynomial_coeffs)s,
                 is_newton = %(is_newton)s
             WHERE
                 function_id = %(function_id)s
@@ -1246,7 +1164,7 @@ def add_newton_model_NF(function_id, my_cursor, model_name='original', log_file=
         log_file.write('newton model timeout: ' + str(timeout) + ':' + str(function_id) + '\n')
     except Exception as e:
         log_file.write('newton model failure: ' + str(function_id) + 'with error:' + str(e) + '\n')
-        raise
+        #raise
     cancel_alarm()
     return False
 
@@ -1337,7 +1255,7 @@ def add_is_lattes_NF(function_id, my_cursor, model_name='original', log_file=sys
         log_file.write('is lattes timeout: ' + str(timeout) + ':' + str(function_id) + '\n')
     except Exception as e:
         log_file.write('is lattes failure: ' + str(function_id) + 'with error:' + str(e) + '\n')
-        raise
+        #raise
     cancel_alarm()
     return False
 

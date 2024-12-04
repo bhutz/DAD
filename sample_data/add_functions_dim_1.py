@@ -1,6 +1,8 @@
 
-from functions.function_dim_1_helpers_NF import model_in_database_NF
+from fields.field_helpers_NF import normalize_field_NF
+from fields.field_helpers_NF import lmfdb_field_label_NF
 
+from functions.function_dim_1_helpers_NF import model_in_database_NF
 from functions.function_dim_1_helpers_NF import add_function_all_NF
 
 ###################################
@@ -20,7 +22,7 @@ log_file = open(path_to_log, 'w', 1)
 #x^2 + c
 P=ProjectiveSpace(QQ,1,'x,y')
 x,y = P.gens()
-for c in QQ.range_by_height(8): #test bigger numbers here; crash error or timeout error
+for c in QQ.range_by_height(3): #test bigger numbers here; crash error or timeout error
     F=DynamicalSystem([x**2+c*y**2,y**2]) #polys
     if not model_in_database_NF(F, my_cursor)[0]:
         label = add_function_all_NF(F, my_cursor, citations=['Poonen1998'], log_file=log_file)
@@ -90,6 +92,22 @@ E = EllipticCurve([0,0,0,0,1])
 F = P.Lattes_map(E,2)
 add_function_all_NF(F, my_cursor, log_file=log_file)
 
+
+#Some number field examples
+for d in range(2,6):
+    if ZZ(d).is_squarefree():
+        K = QuadraticField(d,'v')
+        K,phi = normalize_field_NF(K)
+        print(lmfdb_field_label_NF(K))
+        P=ProjectiveSpace(K,1,'x,y')
+        x,y = P.gens()
+        for c in K.elements_of_bounded_height(bound=4):
+            #print(c)
+            F,phi = normalize_function_NF(DynamicalSystem([x**2+c*y**2,y**2])) #polys
+            label = add_function_all_NF(F, my_cursor, citations=['Poonen1998'])#update citations
+    my_session.commit()
+
+my_session.commit()
 
 log_file.close()
 

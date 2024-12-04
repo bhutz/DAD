@@ -69,14 +69,6 @@ CREATE TYPE base_field_type AS (
   [field_label_length])
 
 
-#my_cursor.execute("""
-#CREATE TYPE sigma_invariants_type AS (
-#    one      varchar[],
-#    two      varchar[],
-#    three    varchar[]
-#  )
-#""")
-
 my_cursor.execute("""
 CREATE TYPE model_type AS (
     coeffs      varchar[],
@@ -87,16 +79,16 @@ CREATE TYPE model_type AS (
   )""",
   [field_label_length])
 
-my_cursor.execute("""
-CREATE TYPE newton_model_type AS (
-    coeffs      varchar[],
-    resultant   varchar,
-    bad_primes  integer[],
-    height      real,
-    base_field_label  varchar(%s),
-    polynomial_coeffs  varchar[]
-  )""",
-  [field_label_length])
+#my_cursor.execute("""
+#CREATE TYPE newton_model_type AS (
+#    coeffs      varchar[],
+#    resultant   varchar,
+#    bad_primes  integer[],
+#    height      real,
+#    base_field_label  varchar(%s),
+#    polynomial_coeffs  varchar[]
+#  )""",
+#  [field_label_length])
 
 
 ######################################
@@ -124,9 +116,8 @@ CREATE TABLE functions_dim_1_NF (
     family integer[],
     original_model model_type,
     monic_centered model_type,
-    chebyshev_model model_type,
     reduced_model model_type,
-    newton_model newton_model_type,
+    netwon_polynomial_coeffs varchar[],
     display_model display_model_type,
     is_polynomial boolean,
     is_chebyshev boolean,
@@ -155,9 +146,8 @@ CREATE TABLE functions_dim_1_FF (
     family varchar[],
     original_model model_type,
     monic_centered model_type,
-    chebyshev_model model_type,
     reduced_model model_type,
-    newton_model newton_model_type,
+    newton_polynomial_coeffs varchar[],
     display_model display_model_type,
     is_polynomial boolean,
     is_chebyshev boolean,
