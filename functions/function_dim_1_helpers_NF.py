@@ -339,8 +339,6 @@ def add_function_NF(F, my_cursor, bool_add_field=False, log_file=sys.stdout, tim
     #    F, phi = normalize_function(F, log_file=log_file)
     #    base_field = F.base_ring()
 
-    print(F)
-    print(normalize_function_NF(F))
     F, phi = normalize_function_NF(F, log_file=log_file)
 
     bool, K_id = lmfdb_field_label_NF(base_field)
@@ -375,8 +373,6 @@ def add_function_NF(F, my_cursor, bool_add_field=False, log_file=sys.stdout, tim
 
     if found == 1:
         #function or rational conjugate already there
-        #print(L)
-        #print('function already known for : ' + str(L[0]) + '\n')
         log_file.write('function already known for : ' + str(L[0]) + '\n')
         return False, L[0]
     # otherwise we'll add the function
@@ -394,7 +390,6 @@ def add_function_NF(F, my_cursor, bool_add_field=False, log_file=sys.stdout, tim
     f['original_model.bad_primes'] = [int(p) for p in bad_primes]
     f['original_model.height'] = float(F.global_height())
     f['original_model.base_field_label'] = f['base_field_label']
-    #f['original_model.base_field.degree'] = f['base_field.degree']
     #models['original'].update({'base_field_emb': int(emb_index)})
     M = MatrixSpace(F.base_ring(), F.domain().dimension_relative()+1, F.domain().dimension_relative()+1).one()
     #conjugation to original model
@@ -841,7 +836,6 @@ def add_reduced_model_NF(function_id, my_cursor, model_name='original', log_file
         query['reduced_model.bad_primes'] = [int(p) for p in bad_primes]
         query['reduced_model.height'] = float(F.global_height())
         query['reduced_model.base_field_label'] = K_id
-        #query['reduced_model.base_field.degree'] = int(F.base_ring().degree())
         #models['original'].update({'base_field_emb': int(emb_index)})
         #conjugation to original model
         query['reduced_model.conjugation_from_original'] = [str(t) for r in M for t in r]
@@ -950,7 +944,6 @@ def add_monic_centered_model_NF(function_id, my_cursor, model_name='original', l
     try:
         F = get_sage_func_NF(function_id, model_name, my_cursor, log_file=log_file)
         N = F.domain().dimension()
-        #todo fix normal form so this does not have to be special cased
         G,M,phi = F.normal_form(return_conjugation=True)
         #base field may have changed so normalize again
         G, phi = normalize_function_NF(G, log_file=log_file)
@@ -975,7 +968,6 @@ def add_monic_centered_model_NF(function_id, my_cursor, model_name='original', l
         query['monic_centered.bad_primes'] = [int(p) for p in bad_primes]
         query['monic_centered.height'] = float(G.global_height())
         query['monic_centered.base_field_label'] = L_id
-        #query['monic_centered.base_field.degree'] = int(L.degree())
         #models['original'].update({'base_field_emb': int(emb_index)})
         #conjugation to original model
         query['monic_centered.conjugation_from_original'] = [str(t) for r in M for t in r]
@@ -1139,7 +1131,6 @@ def add_chebyshev_model_NF(function_id, my_cursor, model_name='original', log_fi
         query['chebyshev_model.bad_primes'] = [int(p) for p in bad_primes]
         query['chebyshev_model.height'] = float(ch.global_height())
         query['chebyshev_model.base_field_label'] = K_id
-        #query['chebyshev_model.base_field.degree'] = int(K.degree())
         #models['original'].update({'base_field_emb': int(emb_index)})
         #conjugation to original model
         N = ch.domain().dimension()
@@ -1277,7 +1268,6 @@ def add_newton_model_NF(function_id, my_cursor, model_name='original', log_file=
         query['newton_model.bad_primes'] = [int(p) for p in bad_primes]
         query['newton_model.height'] = float(newton.global_height())
         query['newton_model.base_field_label'] = L_id
-        #query['newton_model.base_field.degree'] = int(L.degree())
         #models['original'].update({'base_field_emb': int(emb_index)})
         #conjugation to original model
         query['newton_model.conjugation_from_original'] = [str(t) for r in M for t in r]
@@ -1482,8 +1472,6 @@ def function_in_family_NF(f, F, maxk=3):
         for i in range(len(num_sigmas[k])):
             L.append(fsigmas[k][i]*num_sigmas[k][i].denominator() - num_sigmas[k][i].numerator())
     I = S.ideal(L)
-    #return(I)
-    #f = get_sage_func_NF()
     for v in I.variety():
         g = F.specialization(v)
         if f.change_ring(QQbar).is_conjugate(g.change_ring(QQbar)):
@@ -1569,19 +1557,19 @@ def add_function_all_NF(F, my_cursor, citations=[], log_file=sys.stdout, timeout
     
     if is_new:
         add_citations_NF(F_id, citations, my_cursor, log_file=log_file)
-        add_is_pcf(my_cursor, F_id, 'original', bool_add_field=True, log_file=log_file, timeout=timeout) #has timeout
-        add_critical_portrait(F_id, my_cursor, 'original', log_file=log_file, timeout=timeout) #has timeout
-        add_automorphism_group_NF(F_id, my_cursor, 'original', log_file=log_file, timeout=timeout) #has timeout
-        add_rational_preperiodic_points_NF(F_id, my_cursor, field_label=base_field_label, log_file=log_file, timeout=timeout) #has timeout 
-        add_reduced_model_NF(F_id, my_cursor, log_file=log_file, timeout=timeout) #has timeout
-        add_is_polynomial_NF(F_id, my_cursor, log_file=log_file, timeout=timeout) #has timeout
-        add_monic_centered_model_NF(F_id, my_cursor, log_file=log_file, timeout=timeout) #has timeout
-        add_chebyshev_model_NF(F_id, my_cursor, log_file=log_file, timeout=timeout) #has timeout
-        add_newton_model_NF(F_id, my_cursor, log_file=log_file, timeout=timeout) #has timeout
-        add_is_lattes_NF(F_id, my_cursor, log_file=log_file, timeout=timeout) #has timeout
+        add_is_pcf(my_cursor, F_id, 'original', bool_add_field=True, log_file=log_file, timeout=timeout)
+        add_critical_portrait(F_id, my_cursor, 'original', log_file=log_file, timeout=timeout)
+        add_automorphism_group_NF(F_id, my_cursor, 'original', log_file=log_file, timeout=timeout)
+        add_rational_preperiodic_points_NF(F_id, my_cursor, field_label=base_field_label, log_file=log_file, timeout=timeout)
+        add_reduced_model_NF(F_id, my_cursor, log_file=log_file, timeout=timeout)
+        add_is_polynomial_NF(F_id, my_cursor, log_file=log_file, timeout=timeout)
+        add_monic_centered_model_NF(F_id, my_cursor, log_file=log_file, timeout=timeout)
+        add_chebyshev_model_NF(F_id, my_cursor, log_file=log_file, timeout=timeout)
+        add_newton_model_NF(F_id, my_cursor, log_file=log_file, timeout=timeout)
+        add_is_lattes_NF(F_id, my_cursor, log_file=log_file, timeout=timeout)
         choose_display_model(F_id, my_cursor, log_file=log_file)
         add_families_NF(F_id, my_cursor, log_file=log_file)
     else:
-        add_rational_preperiodic_points_NF(F_id, my_cursor, field_label=base_field_label, log_file=log_file, timeout=timeout) #has timeout
+        add_rational_preperiodic_points_NF(F_id, my_cursor, field_label=base_field_label, log_file=log_file, timeout=timeout)
 
     return F_id
