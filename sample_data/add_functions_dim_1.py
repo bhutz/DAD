@@ -105,7 +105,7 @@ for d in range(2,6):
         for c in K.elements_of_bounded_height(bound=ZZ(4)):
             #print(c)
             F,phi = normalize_function_NF(DynamicalSystem([x**2+c*y**2,y**2])) #polys
-            label = add_function_all_NF(F, my_cursor, citations=['Poonen1998'])#update citations
+            label = add_function_all_NF(F, my_cursor, citations=['Poonen1998'], log_file=log_file)#update citations
     my_session.commit()
 
 my_session.commit()
