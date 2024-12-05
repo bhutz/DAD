@@ -421,6 +421,11 @@ def add_function_NF(F, my_cursor, bool_add_field=False, log_file=sys.stdout, tim
         RETURNING function_id """,f)
     F_id = my_cursor.fetchone()[0]
     f['function_id'] = F_id
+    if my_cursor.rowcount == 0: #error check rowcount after insert
+        log_file.write('add_function_NF failure: ' + str(F_id) + ' not inserted \n')
+        raise ValueError('add_function_NF insert failure on ' + str(F))
+    else:
+        log_file.write('add_function_NF: ' + str(F_id) + ' successfully inserted \n') 
     log_file.write('inserted: ' + str(list(F)) + ' as ' + str(F_id) + '\n')
 
     if found == 2:
@@ -431,6 +436,11 @@ def add_function_NF(F, my_cursor, bool_add_field=False, log_file=sys.stdout, tim
                     SET rational_twists = %(twists)s
                     WHERE function_id=%(function_id)s
                     """,f)
+        if my_cursor.rowcount == 0: #error check rowcount after update
+            log_file.write('add_function_NF failure: ' + str(F_id) + ' not updated \n')
+        else:
+            log_file.write('add_function_NF: ' + str(F_id) + ' successfully updated \n') 
+
         for twist_id in L:
             my_cursor.execute("""SELECT rational_twists FROM functions_dim_1_NF
                 WHERE function_id=%s """,[twist_id])
@@ -443,6 +453,10 @@ def add_function_NF(F, my_cursor, bool_add_field=False, log_file=sys.stdout, tim
                     SET rational_twists = %s
                     WHERE function_id=%s
                     """,[twist_list, twist_id])
+            if my_cursor.rowcount == 0: #error check rowcount after update
+                log_file.write('add_function_NF failure: ' + str(twist_id) + ' not updated \n')
+            else:
+                log_file.write('add_function_NF: ' + str(twist_id) + ' successfully updated \n') 
             log_file.write('updating twist list for: ' + str(twist_id) + '\n')
     return True, F_id
 
@@ -537,6 +551,10 @@ def add_critical_portrait(function_id, my_cursor, model_name='original', log_fil
             SET critical_portrait_graph_id = %(critical_portrait_graph_id)s
             WHERE function_id=%(function_id)s
             """,query)
+        if my_cursor.rowcount == 0: #error check rowcount after update
+            log_file.write('add_critical_portait failure: ' + str(function_id) + ' not updated \n')
+        else:
+            log_file.write('add_critical_portrait: ' + str(function_id) + ' successfully updated \n')      
         cancel_alarm()
         log_file.write('critical portrait added:' + str(function_id) + '\n')
         return True
@@ -574,7 +592,10 @@ def add_automorphism_group_NF(function_id, my_cursor, model_name='original', log
             SET automorphism_group_cardinality = %(automorphism_group_cardinality)s
             WHERE function_id=%(function_id)s
             """,query)
-        #TODO check rowcount for success
+        if my_cursor.rowcount == 0: #error check rowcount after update
+            log_file.write('add_automorphism_group_NF failure: ' + str(function_id) + ' not updated \n')
+        else:
+            log_file.write('add_automorphism_group_NF: ' + str(function_id) + ' successfully updated \n') 
         cancel_alarm()
         log_file.write('aut group computed for:' + str(function_id) + '\n')
         return True
@@ -652,6 +673,10 @@ def identify_graph(G, f, my_cursor, type, log_file=sys.stdout):
                 WHERE
                     graph_id = %s
                 """, [new_type, row['graph_id']])
+                if my_cursor.rowcount == 0: #error check rowcount after update
+                    log_file.write('identify_graph failure: ' + str(row['graph_id']) + ' not updated \n')
+                else:
+                    log_file.write('identify_graph: ' + str(row['graph_id']) + ' successfully updated \n') 
                 log_file.write('updated type for ' + str(row['graph_id']) + '\n')
             return row['graph_id']
     # the graph is not in the table, so add it
@@ -668,6 +693,10 @@ def identify_graph(G, f, my_cursor, type, log_file=sys.stdout):
         %(periodic_cardinality)s, %(preperiodic_components)s, %(positive_in_degree)s,
         %(max_tail)s, %(type)s)
         RETURNING graph_id """, graph_data)
+    if my_cursor.rowcount == 0: #error check rowcount after insert
+        log_file.write('identify_graph failure: ' + str(graph_data['edges']) + ' not inserted \n')
+    else:
+        log_file.write('identify_graph: ' + str(graph_data['edges']) + ' successfully inserted \n') 
     log_file.write('adding preperiodic graph to table: ' + str(graph_data['edges']) + '\n')
     return my_cursor.fetchone()[0]
 
@@ -746,8 +775,10 @@ def add_rational_preperiodic_points_NF(function_id, my_cursor, model_name='origi
             VALUES
             (%(function_id)s, %(base_field_label)s, %(rational_periodic_points)s, %(graph_id)s)
             RETURNING id """,preperiodic_data)
-
-        #TODO check rowcount for success
+        if my_cursor.rowcount == 0: #error check rowcount after insert
+            log_file.write('add_rational_preperiodic_points_NF failure: ' + str(function_id) + ' not inserted \n')
+        else:
+            log_file.write('add_rational_preperiodic_points_NF: ' + str(function_id) + ' successfully inserted \n') 
         log_file.write('rational preperiodic points computed for:' + str(function_id) + '\n')
         cancel_alarm()
         return True
@@ -829,9 +860,12 @@ def add_reduced_model_NF(function_id, my_cursor, model_name='original', log_file
             WHERE
                 function_id = %(function_id)s
             """, query)
+        if my_cursor.rowcount == 0: #error check rowcount after update
+            log_file.write('add_reduced_model_NF failure: ' + str(function_id) + ' not updated \n')
+        else:
+            log_file.write('add_reduced_model_NF: ' + str(function_id) + ' successfully updated \n') 
         log_file.write('reduced model computed: ' + str(function_id) + '\n')
         cancel_alarm()
-        #TODO check rowcount
         return True
 
     except AlarmInterrupt:
@@ -863,7 +897,10 @@ def add_is_polynomial_NF(function_id, my_cursor, model_name='original', log_file
             SET is_polynomial = %(is_polynomial)s
             WHERE function_id=%(function_id)s
             """,query)
-        #TODO check rowcount for success
+        if my_cursor.rowcount == 0: #error check rowcount after update
+            log_file.write('add_is_polynomial_NF failure: ' + str(function_id) + ' not updated \n')
+        else:
+            log_file.write('add_is_polynomial_NF: ' + str(function_id) + ' successfully updated \n')  
         log_file.write('is polynomial computed: ' + str(function_id) + '\n')
         cancel_alarm()
         return True
@@ -955,8 +992,11 @@ def add_monic_centered_model_NF(function_id, my_cursor, model_name='original', l
             WHERE
                 function_id = %(function_id)s
             """, query)
-
-
+        
+        if my_cursor.rowcount == 0: #error check rowcount after update
+            log_file.write('add_monic_centered_model_NF failure: ' + str(function_id) + ' not updated \n')
+        else:
+            log_file.write('add_monic_centered_model_NF: ' + str(function_id) + ' successfully updated \n') 
         log_file.write('monic centered model computed: ' + str(function_id) + '\n')
         cancel_alarm()
         return True
@@ -1006,7 +1046,10 @@ def add_chebyshev_model_NF(function_id, my_cursor, model_name='original', log_fi
             WHERE
                 function_id = %(function_id)s
             """, query)
-        #TODO check rowcount
+        if my_cursor.rowcount == 0: #error check rowcount after update
+            log_file.write('add_chebyshev_model_NF failure: ' + str(function_id) + ' not updated \n')
+        else:
+            log_file.write('add_chebyshev_model_NF: ' + str(function_id) + ' successfully updated \n')  
         log_file.write('chebyshev model done for:' + str(function_id) + '\n')
         return True
     #check if chebyshev - Milnor
@@ -1025,7 +1068,10 @@ def add_chebyshev_model_NF(function_id, my_cursor, model_name='original', log_fi
             WHERE
                 function_id = %(function_id)s
             """, query)
-        #TODO check rowcount
+        if my_cursor.rowcount == 0: #error check rowcount after update
+            log_file.write('add_chebyshev_model_NF failure: ' + str(function_id) + ' not updated \n')
+        else:
+            log_file.write('add_chebyshev_model_NF: ' + str(function_id) + ' successfully updated \n') 
         log_file.write('chebyshev model done for:' + str(function_id) + '\n')
         return True
     try:
@@ -1068,7 +1114,10 @@ def add_chebyshev_model_NF(function_id, my_cursor, model_name='original', log_fi
             WHERE
                 function_id = %(function_id)s
             """, query)
-            #TODO check rowcount
+            if my_cursor.rowcount == 0: #error check rowcount after update
+                log_file.write('add_chebyshev_model_NF failure: ' + str(function_id) + ' not updated \n')
+            else:
+                log_file.write('add_chebyshev_model_NF: ' + str(function_id) + ' successfully updated \n') 
             return True
         #else compute a chebyshev model
         log_file.write('computing chebyshev model for:' + str(function_id) + '\n')
@@ -1117,10 +1166,12 @@ def add_chebyshev_model_NF(function_id, my_cursor, model_name='original', log_fi
             WHERE
                 function_id = %(function_id)s
             """, query)
-
         cancel_alarm()
+        if my_cursor.rowcount == 0: #error check rowcount after update
+            log_file.write('add_chebyshev_model_NF failure: ' + str(function_id) + ' not updated \n')
+        else:
+            log_file.write('add_chebyshev_model_NF: ' + str(function_id) + ' successfully updated \n')   
         log_file.write('chebyshev model done for:' + str(function_id) + '\n')
-        #TODO check rowcount
         return True
 
 
@@ -1166,7 +1217,10 @@ def add_newton_model_NF(function_id, my_cursor, model_name='original', log_file=
                 WHERE
                     function_id = %(function_id)s
                 """, query)
-            #TODO check rowcount
+            if my_cursor.rowcount == 0: #error check rowcount after update
+                log_file.write('add_newton_model_NF failure: ' + str(function_id) + ' not updated \n')
+            else:
+                log_file.write('add_newton_model_NF: ' + str(function_id) + ' successfully updated \n')      
             cancel_alarm()
             log_file.write('newton model done for:' + str(function_id) + '\n')
             return True
@@ -1249,8 +1303,11 @@ def add_newton_model_NF(function_id, my_cursor, model_name='original', log_file=
             """, query)
 
         cancel_alarm()
+        if my_cursor.rowcount == 0: #error check rowcount after update
+            log_file.write('add_newton_model_NF failure: ' + str(function_id) + ' not updated \n')
+        else:
+            log_file.write('add_newton_model_NF: ' + str(function_id) + ' successfully updated \n')   
         log_file.write('newton model done for:' + str(function_id) + '\n')
-        #TODO check rowcount
         return True
 
     except AlarmInterrupt:
@@ -1287,7 +1344,10 @@ def add_is_lattes_NF(function_id, my_cursor, model_name='original', log_file=sys
             WHERE
                 function_id = %(function_id)s
             """, query)
-        #TODO check rowcount
+        if my_cursor.rowcount == 0: #error check rowcount after update
+            log_file.write('add_is_lattes_NF failure: ' + str(function_id) + ' not updated \n')
+        else:
+            log_file.write('add_is_lattes_NF ' + str(function_id) + ' successfully updated \n')   
         log_file.write('lattes done for:' + str(function_id) + '\n')
         return True
 
@@ -1341,7 +1401,10 @@ def add_is_lattes_NF(function_id, my_cursor, model_name='original', log_file=sys
             """, query)
         log_file.write('is lattes complete for ' + str(function_id) + '\n')
         cancel_alarm()
-        #TODO check rowcount
+        if my_cursor.rowcount == 0: #error check rowcount after update
+            log_file.write('add_is_lattes_NF failure: ' + str(function_id) + ' not updated \n')
+        else:
+            log_file.write('add_is_lattes_NF ' + str(function_id) + ' successfully updated \n')   
         return True
 
     except AlarmInterrupt:
@@ -1389,6 +1452,10 @@ def add_citations_NF(function_id, citations, my_cursor, log_file=sys.stdout):
         WHERE
             function_id = %s
         """, [new_cites, function_id])
+    if my_cursor.rowcount == 0: #error check rowcount after update
+        log_file.write('Citations update failure: ' + str(function_id) + '\n')
+    else:
+        log_file.write('Citations update: ' + str(function_id) + ' successful \n')   
     log_file.write('done\n')
     return my_cursor.rowcount
 
@@ -1484,6 +1551,10 @@ def add_families_NF(function_id, my_cursor, log_file=sys.stdout):
             SET family = %s
             WHERE function_id=%s
             """,[families, function_id])
+        if my_cursor.rowcount == 0: #error check rowcount after update
+            log_file.write('Families update failure:' + str(function_id) + '\n')
+        else:
+            log_file.write('Families updated: ' + str(function_id) + ' successful \n')   
 
 def add_function_all_NF(F, my_cursor, citations=[], log_file=sys.stdout, timeout=30):
     """
