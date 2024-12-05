@@ -4,6 +4,7 @@ from fields.field_helpers_NF import lmfdb_field_label_NF
 
 from functions.function_dim_1_helpers_NF import model_in_database_NF
 from functions.function_dim_1_helpers_NF import add_function_all_NF
+from functions.function_dim_1_helpers_NF import normalize_function_NF
 
 ###################################
 ###connect to database
@@ -101,7 +102,7 @@ for d in range(2,6):
         print(lmfdb_field_label_NF(K))
         P=ProjectiveSpace(K,1,'x,y')
         x,y = P.gens()
-        for c in K.elements_of_bounded_height(bound=4):
+        for c in K.elements_of_bounded_height(bound=ZZ(4)):
             #print(c)
             F,phi = normalize_function_NF(DynamicalSystem([x**2+c*y**2,y**2])) #polys
             label = add_function_all_NF(F, my_cursor, citations=['Poonen1998'])#update citations

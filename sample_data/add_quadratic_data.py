@@ -28,20 +28,19 @@ x,y = P.gens()
 def parallel_function(F):
     load("connect.py")
     if not model_in_database_NF(F, my_cursor)[0]:
-        result =  add_function_all_NF(F, my_cursor, citations=['Poonen1998'], log_file=log_file)
+        result =  add_function_all_NF(F, my_cursor, citations=['Poonen1998'], log_file=log_file, timeout=60)
     else:
         result = 0
     my_session.commit()
     my_session.close()
     return result
 
-# Calling possible_periods for each prime in parallel
 parallel_data = []
-for c in QQ.range_by_height(50): #test bigger numbers here; crash error or timeout error #check if parallelism works without crashing
-    F=DynamicalSystem([x**2+c*y**2,y**2]) #polys
+for c in QQ.range_by_height(120):
+    F=DynamicalSystem([x**2+c*y**2,y**2])
     parallel_data.append(((F,), {}))
 
-parallel_iter = p_iter_fork(10, 0) 
+parallel_iter = p_iter_fork(12, 0)
 parallel_results = list(parallel_iter(parallel_function, parallel_data))
 
 
