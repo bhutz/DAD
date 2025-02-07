@@ -1,3 +1,0 @@
-family_id,degree,num_parameters,model_coeffs,model_resultant,base_field_label,base_field_degree,sigma_one,sigma_two,sigma_three,ordinal,citations,is_polynomial,num_critical_points,automorphism_group_cardinality
-1,2,1,"{{1,0,t},{0,0,1}}",1,1.1.1.1,1,c654b77e,b813c819,ebcdc923,1,{4},t,2,1
-2,3,1,"{{1,0,0,t},{0,0,0,1}}",1,1.1.1.1,1,ccc0a6ff,c587070c,fd9d46e7,1,,t,2,1
